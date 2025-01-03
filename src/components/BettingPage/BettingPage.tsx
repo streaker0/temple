@@ -20,6 +20,7 @@ const BettingPage: React.FC = () => {
         spotCards,
         spotBets,
         dealerCards,
+		dealerTotal,
         setSelectedDenomination,
         calculateHandTotal,
         placeBet,
@@ -39,6 +40,7 @@ const BettingPage: React.FC = () => {
                 spotCards={spotCards}
                 spotBets={spotBets}
                 handTotal={calculateHandTotal()}
+				dealerTotal={dealerTotal}
                 anteBet={anteBet}
                 onBetClick={() => placeBet(selectedDenomination)}
             />

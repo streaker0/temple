@@ -10,6 +10,7 @@ interface GameBoardProps {
     spotCards: SpotCard[];
     spotBets: Array<{ faceUp: number; faceDown: number }>;
     handTotal: number;
+	dealerTotal: number;
     anteBet: number;
     onBetClick: () => void;
 }
@@ -22,6 +23,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
     spotCards,
     spotBets,
     handTotal,
+	dealerTotal,
     anteBet,
     onBetClick
 }) => {
@@ -31,7 +33,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
                 <div className="dealer-cards">
 				{(gameState === 'playing' || gameState === 'gameOver') && (
                     <div className="dealer-total">
-                        {handTotal > 0 ? handTotal : '-'}
+                        {dealerTotal > 0 ? dealerTotal : '-'}
                     </div>
                 )}
                     {gameState === 'gameOver' ? (

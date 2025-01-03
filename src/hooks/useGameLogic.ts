@@ -18,6 +18,7 @@ export const useGameLogic = () => {
         Array(4).fill({ faceUp: 0, faceDown: 0 })
     );
     const [dealerCards, setDealerCards] = useState<SpotCard[]>([]);
+	const [dealerTotal, setDealerTotal] = useState(0)
 
     const handleGameOver = () => {
         setGameState('gameOver');
@@ -27,14 +28,13 @@ export const useGameLogic = () => {
             currentDealerCards = [{ ...dealerCard, isFaceUp: true }];
         }
 
-        let dealerTotal = currentDealerCards.reduce((total, card) => 
-            card ? total + getCardValue(card.rank) : total, 0);
+  
 
         while (dealerTotal < DEALER_MIN_TOTAL && currentDealerCards.length < MAX_CARDS) {
             const newCard = dealRandomCard();
-            newCard.isFaceUp = true;
+            newCard!.isFaceUp = true;
             currentDealerCards.push(newCard);
-            dealerTotal += getCardValue(newCard.rank);
+            setDealerTotal(prev=> prev + getCardValue(newCard!.rank)) ;
         }
         
         setDealerCards(currentDealerCards);
@@ -51,6 +51,7 @@ export const useGameLogic = () => {
         const anteValue = anteCard && anteCard.isFaceUp ? getCardValue(anteCard.rank) : 0;
         return spotTotal + anteValue;
     };
+
 
     const placeBet = (amount: number) => {
         if (gameState !== 'betting') return;
@@ -76,7 +77,10 @@ export const useGameLogic = () => {
         if (bet <= 0) return false;
         
         setAnteCard(dealRandomCard());
-        setDealerCard(dealRandomCard());
+		let newCard = dealRandomCard();
+		newCard!.isFaceUp = true;
+        setDealerCard(newCard);
+		setDealerTotal(getCardValue(newCard!.rank));
         setGameState('playing');
         setCurrentSpotIndex(0);
         return true;
@@ -97,7 +101,7 @@ export const useGameLogic = () => {
                 if (balance >= anteBet) {
                     const newCard = dealRandomCard();
                     if (action === 'faceUp') {
-                        newCard.isFaceUp = true;
+                        newCard!.isFaceUp = true;
                     }
 
                     setSpotCards(prev => {
@@ -141,6 +145,7 @@ export const useGameLogic = () => {
         spotCards,
         spotBets,
         dealerCards,
+		dealerTotal,
         setSelectedDenomination,
         calculateHandTotal,
         placeBet,
