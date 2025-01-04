@@ -10,6 +10,7 @@ const BettingPage: React.FC = () => {
     const {
         balance,
         bet,
+		lastBet,
         anteBet,
         selectedDenomination,
         showChipButtons,
@@ -26,7 +27,9 @@ const BettingPage: React.FC = () => {
         placeBet,
         clearBet,
         startGame,
-        handlePlayerAction
+        handlePlayerAction,
+		handleRebet,
+		startNewGame
     } = useGameLogic();
 
     return (
@@ -53,7 +56,8 @@ const BettingPage: React.FC = () => {
                 gameState={gameState}
                 balance={balance}
                 bet={bet}
-                onRebet={() => alert('Rebet button clicked!')}
+				lastBet={lastBet}
+                onRebet={() => handleRebet()}
                 onClearBet={clearBet}
                 onToggleChips={() => setShowChipButtons(!showChipButtons)}
                 selectedDenomination={selectedDenomination}
@@ -61,6 +65,7 @@ const BettingPage: React.FC = () => {
                 onStand={() => handlePlayerAction('stand')}
                 onFaceUp={() => handlePlayerAction('faceUp')}
                 onFaceDown={() => handlePlayerAction('faceDown')}
+				onNewGame={()=>startNewGame()}
             />
         </div>
     );

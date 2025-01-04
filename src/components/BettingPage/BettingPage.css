@@ -89,6 +89,7 @@
     left: 50%;
     transform: translateX(-50%);
     z-index: 1;
+	width: 96px;
 }
 
 .ante-circle.active {
