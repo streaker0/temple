@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { GameState, PlayerAction, SpotCard, SpotBet } from '../types/game.types';
 import { dealRandomCard, getCardValue } from '../utils/cardUtils';
+import { determineGameOutcome } from '../utils/gameEndUtils';
 import { INITIAL_BALANCE, MAX_BET, MIN_BET, DEALER_MIN_TOTAL, MAX_CARDS, NUM_SPOTS } from '../constants/game.constants';
 
 export const useGameLogic = () => {
@@ -23,23 +24,41 @@ export const useGameLogic = () => {
     const handleGameOver = () => {
         setGameState('gameOver');
         let currentDealerCards: SpotCard[] = [];
+        let finalDealerTotal = dealerTotal;
         
         if (dealerCard) {
             currentDealerCards = [{ ...dealerCard, isFaceUp: true }];
         }
 
-  
-
-        while (dealerTotal < DEALER_MIN_TOTAL && currentDealerCards.length < MAX_CARDS) {
+        while (finalDealerTotal < DEALER_MIN_TOTAL && currentDealerCards.length < MAX_CARDS) {
             const newCard = dealRandomCard();
             newCard!.isFaceUp = true;
             currentDealerCards.push(newCard);
-            setDealerTotal(prev=> prev + getCardValue(newCard!.rank)) ;
+            finalDealerTotal += getCardValue(newCard!.rank);
         }
         
         setDealerCards(currentDealerCards);
+        setDealerTotal(finalDealerTotal);
         setAnteCard(prev => prev ? { ...prev, isFaceUp: true } : null);
         setSpotCards(prev => prev.map(card => card ? { ...card, isFaceUp: true } : null));
+        
+        const playerTotal = calculateHandTotal();
+        const outcome = determineGameOutcome(playerTotal, finalDealerTotal);
+        
+        if (outcome === 'win') {
+            setBalance(prev => prev + bet * 2);
+			  // Return bet plus winnings
+        } else if (outcome === 'bust') {
+            setBalance(prev => prev + Math.floor(bet * 0.5));  // Return half bet
+			
+        }
+		else if (outcome === 'tie') {
+            setBalance(prev => prev + bet);  // Return bet
+			
+        }
+			
+		
+        // On lose, bet is already deducted
     };
 
     const calculateHandTotal = () => {
