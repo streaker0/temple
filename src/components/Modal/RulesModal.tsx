@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 export const RulesModal = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -29,13 +29,13 @@ export const RulesModal = () => {
 
         <div className="space-y-6">
           <div className="bg-gray-100 p-4 rounded-lg">
-            <h3 className="font-bold mb-2">Game Objective</h3>
-            <p>Get closer to 20 than the dealer without going over. Face cards (J,Q,K) = 0, Ace = 1, number cards = face value.</p>
+            <h3 className="font-bold mb-2 text-black">Game Objective</h3>
+            <p className= "text-black">Get closer to 20 than the dealer without going over. Face cards (J,Q,K) = 0, Ace = 1, number cards = face value.</p>
           </div>
 
           <div className="bg-gray-100 p-4 rounded-lg">
-            <h3 className="font-bold mb-2">Game Flow</h3>
-            <div className="space-y-2">
+            <h3 className="font-bold mb-2 text-black">Game Flow</h3>
+            <div className="space-y-2 text-black">
               <p>1. Place your ante bet (minimum $1, maximum $1000)</p>
               <p>2. Receive your ante card and see dealer's first card</p>
               <p>3. Place additional bets in up to 4 spots, either face-up or face-down</p>
@@ -44,8 +44,8 @@ export const RulesModal = () => {
           </div>
 
           <div className="bg-gray-100 p-4 rounded-lg">
-            <h3 className="font-bold mb-2">Winning & Payouts</h3>
-            <div className="space-y-2">
+            <h3 className="font-bold mb-2 text-black">Winning & Payouts</h3>
+            <div className="space-y-2 text-black">
               <p>• Win: Player closer to 20 than dealer - 2:1 payout</p>
               <p>• Lose: Dealer closer to 20 or player over 20 - Lose bet</p>
               <p>• Tie: Equal totals - Bet returned</p>
@@ -54,8 +54,8 @@ export const RulesModal = () => {
           </div>
 
           <div className="bg-gray-100 p-4 rounded-lg">
-            <h3 className="font-bold mb-2">Special Rules</h3>
-            <div className="space-y-2">
+            <h3 className="font-bold mb-2 text-black">Special Rules</h3>
+            <div className="space-y-2 text-black">
               <p>• Dealer must draw to at least 15</p>
               <p>• Maximum 5 cards per hand</p>
               <p>• Face-down cards are revealed at the end of the game</p>
