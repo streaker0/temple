@@ -40,6 +40,8 @@ export const useGameLogic = () => {
 		setGameState('gameOver');
 		let currentDealerCards: SpotCard[] = [];
 		let finalDealerTotal = dealerTotal;
+		console.log(finalDealerTotal);
+
 
 		if (dealerCard) {
 			currentDealerCards = [{ ...dealerCard, isFaceUp: true }];
@@ -52,27 +54,37 @@ export const useGameLogic = () => {
 			finalDealerTotal += getCardValue(newCard!.rank);
 		}
 
+
+
 		setDealerCards(currentDealerCards);
 		setDealerTotal(finalDealerTotal);
+
 		setAnteCard(prev => prev ? { ...prev, isFaceUp: true } : null);
 		setSpotCards(prev => prev.map(card => card ? { ...card, isFaceUp: true } : null));
 
-		const playerTotal = calculateHandTotal();
+		const playerTotal = calculateFinalTotal();
+		console.log("player total" + playerTotal);
+
 		const outcome = determineGameOutcome(playerTotal, finalDealerTotal);
+
 		setLastBet(anteBet);
 
 		if (outcome === 'win') {
 			setBalance(prev => prev + bet * 2);
-			alert("Player wins!")  // Return bet plus winnings
+			alert("Player wins!");
+			// Return bet plus winnings
 		} else if (outcome === 'bust') {
 			setBalance(prev => prev + Math.floor(bet * 0.5));  // Return half bet
-			alert("Both bust!")
+			alert("Both bust!");
+
 		}
 		else if (outcome === 'tie') {
 			setBalance(prev => prev + bet);  // Return bet
-			alert("Tie!")
+			alert("Tie!");
+
 		} else
-			alert("Dealer wins!")
+			alert("Dealer wins!");
+
 
 		// On lose, bet is already deducted
 	};
@@ -93,6 +105,19 @@ export const useGameLogic = () => {
 		}, 0);
 
 		const anteValue = anteCard && anteCard.isFaceUp ? getCardValue(anteCard.rank) : 0;
+		console.log("spot total = " + spotTotal + " ante value = " + anteValue);
+
+		return spotTotal + anteValue;
+	};
+
+	const calculateFinalTotal = () => {
+		// Calculate total including all cards regardless of face-up status
+		const spotTotal = spotCards.reduce((total, card) => {
+			if (!card) return total;
+			return total + getCardValue(card.rank);
+		}, 0);
+
+		const anteValue = anteCard ? getCardValue(anteCard.rank) : 0;
 		return spotTotal + anteValue;
 	};
 
