@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Card from '../CardProps/CardProps';
+import './BettingPage.css';
 import { SpotCard } from '../../types/game.types';
 
 interface GameBoardProps {
@@ -10,9 +11,10 @@ interface GameBoardProps {
     spotCards: SpotCard[];
     spotBets: Array<{ faceUp: number; faceDown: number }>;
     handTotal: number;
-	dealerTotal: number;
+    dealerTotal: number;
     anteBet: number;
     onBetClick: () => void;
+    outcome?: 'win' | 'lose' | 'tie' | 'bust' | null;
 }
 
 export const GameBoard: React.FC<GameBoardProps> = ({
@@ -23,29 +25,70 @@ export const GameBoard: React.FC<GameBoardProps> = ({
     spotCards,
     spotBets,
     handTotal,
-	dealerTotal,
+    dealerTotal,
     anteBet,
-    onBetClick
+    onBetClick,
+    outcome
 }) => {
+    const [showDealer, setShowDealer] = useState(false);
+    const [animateSpots, setAnimateSpots] = useState<boolean[]>([]);
+
+    useEffect(() => {
+        if (gameState === 'playing' || gameState === 'gameOver') {
+            setShowDealer(true);
+        }
+    }, [gameState]);
+
+    useEffect(() => {
+        // Reset animation state when cards change or game state changes
+        setAnimateSpots(Array(4).fill(false));
+        
+        if (gameState === 'playing') {
+            // Animate spots sequentially with proper timing
+            const animationTimeout = setTimeout(() => {
+                spotCards.forEach((_, index) => {
+                    setTimeout(() => {
+                        setAnimateSpots(prev => {
+                            const newState = [...prev];
+                            newState[index] = true;
+                            return newState;
+                        });
+                    }, index * 300); // Increased delay between spots for smoother animation
+                });
+            }, 100); // Small initial delay
+
+            return () => clearTimeout(animationTimeout);
+        }
+    }, [spotCards, gameState]);
+
+
     return (
         <>
-            <div className={`dealer-area ${gameState === 'playing' || gameState === 'gameOver' ? 'visible' : 'hidden'}`}>
+            <div className={`dealer-area ${showDealer ? 'visible' : 'hidden'}`}>
                 <div className="dealer-cards">
-				{(gameState === 'playing' || gameState === 'gameOver') && (
-                    <div className="dealer-total">
-                        {dealerTotal > 0 ? dealerTotal : '-'}
-                    </div>
-                )}
+                    {(gameState === 'playing' || gameState === 'gameOver') && (
+                        <div className="dealer-total">
+                            {dealerTotal > 0 ? dealerTotal : '-'}
+                        </div>
+                    )}
                     {gameState === 'gameOver' ? (
-                        dealerCards.map((card, index) => (
-                            <Card
-                                key={index}
-                                suit={card?.suit}
-                                rank={card?.rank}
-                                isFaceUp={card?.isFaceUp}
-                                className="dealer-card"
-                            />
-                        ))
+                        dealerCards.map((card, index) => {
+                            // Determine if this card contributed to a winning/losing hand
+                            const isWinningDealer = outcome === 'win';
+                            const isLosingDealer = outcome === 'lose' || outcome === 'bust';
+                            return (
+                                <Card
+                                    key={index}
+                                    suit={card?.suit}
+                                    rank={card?.rank}
+                                    isFaceUp={card?.isFaceUp}
+                                    className={`dealer-card revealed ${outcome ? 'outcome-revealed' : ''} ${isWinningDealer ? 'winning-card' : ''} ${isLosingDealer ? 'losing-card' : ''}`}
+                                    isDealt={true}
+                                    isWinning={isWinningDealer}
+                                    isLosing={isLosingDealer}
+                                />
+                            );
+                        })
                     ) : (
                         dealerCard && (
                             <Card
@@ -53,6 +96,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
                                 rank={dealerCard.rank}
                                 isFaceUp={dealerCard.isFaceUp}
                                 className="dealer-card"
+                                isDealt={true}
                             />
                         )
                     )}
@@ -74,7 +118,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
                         <div className="ante-container">
                             <div className="ante-label">Ante</div>
                             <div
-                                className={`ante-circle ${gameState === 'betting' ? 'active' : ''}`}
+                                className={`ante-circle ${gameState === 'betting' ? 'active' : ''} ${anteBet > 0 ? 'chip-placed' : ''}`}
                                 onClick={gameState === 'betting' ? onBetClick : undefined}
                             >
                                 ${anteBet}
@@ -85,6 +129,9 @@ export const GameBoard: React.FC<GameBoardProps> = ({
                                     rank={anteCard.rank}
                                     isFaceUp={anteCard.isFaceUp}
                                     className="ante-card"
+                                    isDealt={true}
+                                    isWinning={outcome === 'win'}
+                                    isLosing={outcome === 'lose' || outcome === 'bust'}
                                 />
                             )}
                         </div>
@@ -97,15 +144,19 @@ export const GameBoard: React.FC<GameBoardProps> = ({
                                             suit={spotCards[spotIndex]!.suit}
                                             rank={spotCards[spotIndex]!.rank}
                                             isFaceUp={spotCards[spotIndex]!.isFaceUp}
+                                            isDealt={animateSpots[spotIndex]}
+                                            isWinning={outcome === 'win'}
+                                            isLosing={outcome === 'lose' || outcome === 'bust'}
+                                            className={`${outcome ? 'outcome-revealed' : ''}`}
                                         />
                                     )}
                                 </div>
 
-                                <div className="spot-circle face-down">
+                                <div className={`spot-circle face-down ${spotBets[spotIndex].faceDown > 0 ? 'chip-placed' : ''}`}>
                                     ${spotBets[spotIndex].faceDown}
                                 </div>
 
-                                <div className="spot-circle face-up">
+                                <div className={`spot-circle face-up ${spotBets[spotIndex].faceUp > 0 ? 'chip-placed' : ''}`}>
                                     ${spotBets[spotIndex].faceUp}
                                 </div>
                             </div>

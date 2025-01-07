@@ -1,11 +1,15 @@
 import { useState } from 'react';
+import { useBalanceEffect } from './useBalanceEffect';
 import { GameState, PlayerAction, SpotCard, SpotBet } from '../types/game.types';
 import { dealRandomCard, getCardValue } from '../utils/cardUtils';
 import { determineGameOutcome } from '../utils/gameEndUtils';
 import { INITIAL_BALANCE, MAX_BET, MIN_BET, DEALER_MIN_TOTAL, MAX_CARDS, NUM_SPOTS } from '../constants/game.constants';
 
 export const useGameLogic = () => {
-	const [balance, setBalance] = useState(INITIAL_BALANCE);
+	const [balance, setBalance] = useState(() => {
+		const savedBalance = localStorage.getItem('gameBalance');
+		return savedBalance ? parseFloat(savedBalance) : INITIAL_BALANCE;
+	});
 	const [bet, setBet] = useState(0);
 	const [anteBet, setAnteBet] = useState(0);
 	const [selectedDenomination, setSelectedDenomination] = useState(10);
@@ -21,6 +25,13 @@ export const useGameLogic = () => {
 	const [dealerCards, setDealerCards] = useState<SpotCard[]>([]);
 	const [dealerTotal, setDealerTotal] = useState(0);
 	const [lastBet, setLastBet] = useState(0);
+	const [gameOutcome, setGameOutcome] = useState<'win' | 'lose' | 'tie' | 'bust' | null>(null);
+	const [isAnimating, setIsAnimating] = useState(false);
+	const [message, setMessage] = useState<string>('');
+
+	useBalanceEffect(balance);
+
+	const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 	const startNewGame = () => {
 		setGameState('betting');
@@ -33,57 +44,113 @@ export const useGameLogic = () => {
 		setDealerTotal(0);
 		setBet(0);
 		setAnteBet(0);
-
+		setIsAnimating(false);
+		setMessage(''); // Clear any existing messages
+		setGameOutcome(null); // Reset game outcome
 	}
 
-	const handleGameOver = () => {
+	const handleGameOver = async () => {
 		setGameState('gameOver');
+		setIsAnimating(true); // Ensure animation state is true for message display and button locking
 		let currentDealerCards: SpotCard[] = [];
 		let finalDealerTotal = dealerTotal;
-		console.log(finalDealerTotal);
+
+		setMessage("Revealing player's cards...");
+
+		if (anteCard && !anteCard.isFaceUp) {
+			await sleep(1000);
+			setAnteCard(prev => prev ? { ...prev, isFaceUp: true } : null);
+		}
+
+		// Ensure all spot cards are revealed properly
+		const revealSpotCards = async () => {
+			for (let i = 0; i < spotCards.length; i++) {
+				const card = spotCards[i];
+				if (card && !card.isFaceUp) {
+					await sleep(1000); // Wait before flipping each card
+					setSpotCards(prev => {
+						const newCards = [...prev];
+						if (newCards[i]) {
+							newCards[i] = { ...newCards[i]!, isFaceUp: true };
+						}
+						return newCards;
+					});
+				}
+			}
+		};
+		await revealSpotCards();
+
+
+
+		await sleep(1000);
+		setMessage("Dealer's turn...");
+
 
 
 		if (dealerCard) {
 			currentDealerCards = [{ ...dealerCard, isFaceUp: true }];
+			setDealerCards(currentDealerCards);
+			await sleep(1000);
 		}
 
 		while (finalDealerTotal < DEALER_MIN_TOTAL && currentDealerCards.length < MAX_CARDS) {
+			setMessage("Dealer draws a card...");
+			await sleep(1000);
 			const newCard = dealRandomCard();
 			newCard!.isFaceUp = true;
 			currentDealerCards.push(newCard);
 			finalDealerTotal += getCardValue(newCard!.rank);
+			setDealerCards([...currentDealerCards]);
+			setDealerTotal(finalDealerTotal);
+			await sleep(1000);
 		}
 
 
-
-		setDealerCards(currentDealerCards);
-		setDealerTotal(finalDealerTotal);
-
-		setAnteCard(prev => prev ? { ...prev, isFaceUp: true } : null);
-		setSpotCards(prev => prev.map(card => card ? { ...card, isFaceUp: true } : null));
 
 		const playerTotal = calculateFinalTotal();
-		console.log("player total" + playerTotal);
-
 		const outcome = determineGameOutcome(playerTotal, finalDealerTotal);
+		setGameOutcome(outcome);
+
+		// Set the appropriate winner message
+		let winnerMessage = '';
+		if (outcome === 'win') {
+			winnerMessage = 'Player wins!';
+		} else if (outcome === 'lose') {
+			winnerMessage = 'Dealer wins!';
+		} else if (outcome === 'tie') {
+			winnerMessage = "It's a tie!";
+		} else if (outcome === 'bust') {
+			winnerMessage = 'Player busts! Dealer wins!';
+		}
+		setMessage(winnerMessage);
+
+		await sleep(1500); // Increased delay for better timing
+		// Keep isAnimating true until message is displayed and all animations complete
+		switch (outcome) {
+			case 'win':
+				const winnings = bet * 2; // Double the bet for a win
+				setBalance(prev => prev + winnings);
+				setMessage(`Congratulations! You won $${winnings.toFixed(2)}!`);
+				break;
+			case 'lose':
+				setMessage(`Sorry, you lost $${bet.toFixed(2)}.`);
+				break;
+			case 'tie':
+				setBalance(prev => prev + bet); // Return the original bet
+				setMessage("It's a tie! Your bet has been returned.");
+				break;
+			case 'bust':
+				setMessage(`Bust! You lost $${bet.toFixed(2)}.`);
+				break;
+			
+			default:
+				setMessage("Dealer wins. Better luck next time!");
+		}
 
 		setLastBet(anteBet);
+		await sleep(1000); // Give time for message to be seen
+		setIsAnimating(false);
 
-		if (outcome === 'win') {
-			setBalance(prev => prev + bet * 2);
-			alert("Player wins!");
-			// Return bet plus winnings
-		} else if (outcome === 'bust') {
-			setBalance(prev => prev + Math.floor(bet * 0.5));  // Return half bet
-			alert("Both bust!");
-
-		}
-		else if (outcome === 'tie') {
-			setBalance(prev => prev + bet);  // Return bet
-			alert("Tie!");
-
-		} else
-			alert("Dealer wins!");
 
 
 		// On lose, bet is already deducted
@@ -142,58 +209,93 @@ export const useGameLogic = () => {
 		setAnteBet(0);
 	};
 
-	const startGame = () => {
+	const startGame = async () => {
 		if (bet <= 0) return false;
 
-		setAnteCard(dealRandomCard());
-		let newCard = dealRandomCard();
-		newCard!.isFaceUp = true;
-		setDealerCard(newCard);
-		setDealerTotal(getCardValue(newCard!.rank));
+		setMessage("Dealing cards...");
+		setIsAnimating(true);
+
+		// Deal ante card with animation
+		const newAnteCard = dealRandomCard();
+		setAnteCard(newAnteCard);
+		await sleep(1000);
+
+		// Deal dealer's card with animation
+		setMessage("Dealer's card...");
+		let newDealerCard = dealRandomCard();
+		newDealerCard!.isFaceUp = true;
+		setDealerCard(newDealerCard);
+		setDealerTotal(getCardValue(newDealerCard!.rank));
+		await sleep(1000);
+
 		setGameState('playing');
 		setCurrentSpotIndex(0);
+		setIsAnimating(false);
 		return true;
 	};
 
-	const handlePlayerAction = (action: PlayerAction) => {
+	const handlePlayerAction = async (action: PlayerAction) => {
+		if (isAnimating) return;
+
 		if (currentSpotIndex >= 4) {
-			handleGameOver();
+			await handleGameOver();
 			return;
 		}
 
 		switch (action) {
 			case 'stand':
-				handleGameOver();
+				await handleGameOver();
 				break;
 			case 'faceUp':
 			case 'faceDown':
 				if (balance >= anteBet) {
-					const newCard = dealRandomCard();
-					if (action === 'faceUp') {
-						newCard!.isFaceUp = true;
-					}
+					setIsAnimating(true);
+					try {
+						const newCard = dealRandomCard();
+						if (action === 'faceUp') {
+							newCard!.isFaceUp = true;
+						}
 
-					setSpotCards(prev => {
-						const newCards = [...prev];
-						newCards[currentSpotIndex] = newCard;
-						return newCards;
-					});
+						// Update cards while preserving existing bets
+						const updatedCards = [...spotCards];
+						const oppositeAction = action === 'faceUp' ? 'faceDown' : 'faceUp';
+						
+						// Only allow one card per spot
+						if (spotBets[currentSpotIndex][oppositeAction] > 0) {
+							setIsAnimating(false);
+							return;
+						}
+						
+						// Set message and update card
+						setMessage("Dealing card...");
+						updatedCards[currentSpotIndex] = newCard;
+						setSpotCards(updatedCards);
 
-					setSpotBets(prev => {
-						const newBets = [...prev];
-						newBets[currentSpotIndex] = {
-							...newBets[currentSpotIndex],
+						// Update bets while preserving existing bets
+						const updatedBets = [...spotBets];
+						updatedBets[currentSpotIndex] = {
+							...updatedBets[currentSpotIndex],
 							[action === 'faceUp' ? 'faceUp' : 'faceDown']: anteBet
 						};
-						return newBets;
-					});
+						setSpotBets(updatedBets);
 
-					setBalance(prev => prev - anteBet);
-					setBet(prev => prev + anteBet);
-					setCurrentSpotIndex(prev => prev + 1);
+						setBalance(prev => prev - anteBet);
+						setBet(prev => prev + anteBet);
+						
+						// Wait for animation to complete
+						await sleep(1000);
+						setMessage("");
+						
+						setCurrentSpotIndex(prev => prev + 1);
 
-					if (currentSpotIndex === 3) {
-						handleGameOver();
+						if (currentSpotIndex === 3) {
+							await handleGameOver();
+						} else {
+							setIsAnimating(false);
+						}
+					} catch (error) {
+						console.error('Error in handlePlayerAction:', error);
+						setIsAnimating(false);
 					}
 				}
 				break;
@@ -223,6 +325,10 @@ export const useGameLogic = () => {
 		handlePlayerAction,
 		lastBet,
 		handleRebet,
-		startNewGame
+		startNewGame,
+		gameOutcome,
+		isAnimating,
+		message,
+		setBalance
 	};
 };
