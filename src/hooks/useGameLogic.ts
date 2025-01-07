@@ -28,6 +28,8 @@ export const useGameLogic = () => {
 	const [gameOutcome, setGameOutcome] = useState<'win' | 'lose' | 'tie' | 'bust' | null>(null);
 	const [isAnimating, setIsAnimating] = useState(false);
 	const [message, setMessage] = useState<string>('');
+	const [frontBet, setFrontBet] = useState(0);
+	const [backBet, setBackBet] = useState(0)
 
 	useBalanceEffect(balance);
 
@@ -44,6 +46,8 @@ export const useGameLogic = () => {
 		setDealerTotal(0);
 		setBet(0);
 		setAnteBet(0);
+		setBackBet(0);
+		setFrontBet(0);
 		setIsAnimating(false);
 		setMessage(''); // Clear any existing messages
 		setGameOutcome(null); // Reset game outcome
@@ -120,15 +124,18 @@ export const useGameLogic = () => {
 		} else if (outcome === 'tie') {
 			winnerMessage = "It's a tie!";
 		} else if (outcome === 'bust') {
-			winnerMessage = 'Player busts! Dealer wins!';
+			winnerMessage = 'Both bust!!';
 		}
 		setMessage(winnerMessage);
 
 		await sleep(1500); // Increased delay for better timing
 		// Keep isAnimating true until message is displayed and all animations complete
+		
+		
+		
 		switch (outcome) {
 			case 'win':
-				const winnings = bet * 2; // Double the bet for a win
+				const winnings = (frontBet *2 ) + (backBet * 3); // Double the bet for a win
 				setBalance(prev => prev + winnings);
 				setMessage(`Congratulations! You won $${winnings.toFixed(2)}!`);
 				break;
@@ -140,7 +147,8 @@ export const useGameLogic = () => {
 				setMessage("It's a tie! Your bet has been returned.");
 				break;
 			case 'bust':
-				setMessage(`Bust! You lost $${bet.toFixed(2)}.`);
+				setBalance(prev => prev + (bet*0.5));
+				setMessage(`Both Bust!! You lost $${(bet * 0.5).toFixed(2)}.`);
 				break;
 			
 			default:
@@ -172,7 +180,6 @@ export const useGameLogic = () => {
 		}, 0);
 
 		const anteValue = anteCard && anteCard.isFaceUp ? getCardValue(anteCard.rank) : 0;
-		console.log("spot total = " + spotTotal + " ante value = " + anteValue);
 
 		return spotTotal + anteValue;
 	};
@@ -211,6 +218,9 @@ export const useGameLogic = () => {
 
 	const startGame = async () => {
 		if (bet <= 0) return false;
+		setBackBet(prev =>prev + anteBet)
+		
+
 
 		setMessage("Dealing cards...");
 		setIsAnimating(true);
@@ -278,6 +288,9 @@ export const useGameLogic = () => {
 							[action === 'faceUp' ? 'faceUp' : 'faceDown']: anteBet
 						};
 						setSpotBets(updatedBets);
+						action === 'faceUp' ? setFrontBet(prev => prev + anteBet) : setBackBet(prev => prev + anteBet);
+					
+						
 
 						setBalance(prev => prev - anteBet);
 						setBet(prev => prev + anteBet);

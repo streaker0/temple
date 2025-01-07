@@ -131,7 +131,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
                                     className="ante-card"
                                     isDealt={true}
                                     isWinning={outcome === 'win'}
-                                    isLosing={outcome === 'lose' || outcome === 'bust'}
+                                    isLosing={outcome === 'lose'}
                                 />
                             )}
                         </div>
