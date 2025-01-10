@@ -1,26 +1,35 @@
 import React from 'react';
-import { MIN_BET, MAX_BET } from '../../constants/game.constants';
-import { ChevronLeft} from 'lucide-react'
-import {RulesModal} from '../Modal/RulesModal';
+import { ChevronLeft } from 'lucide-react';
+import RulesModal from '../Modal/RulesModal';
 
 interface HeaderProps {
-    onHomeClick?: () => void;
+    onHomeClick: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({ onHomeClick }) => {
     return (
-        <div className="top-section">
-			<ChevronLeft
-			onClick={onHomeClick}
-			className="w-38 h-38 bg-gradient-to-b from-emerald-900 via-emerald-800 to-emerald-900"/>
-            <RulesModal/>
-
-            <div className="header">TEMPLE</div>
-            <div className="bet-limits">
-                <p>Bet limit:</p>
-                <p>Min: ${MIN_BET}</p>
-                <p>Max: ${MAX_BET}</p>
+        <div className="w-full flex items-center justify-between mb-6 relative">
+            {/* Left side with chevron and rules */}
+            <div className="flex flex-col items-center gap-2">
+                <ChevronLeft 
+                    className="h-12 w-12 text-white hover:text-yellow-400 cursor-pointer transition-colors" 
+                    onClick={onHomeClick}
+                />
+                <RulesModal/>
             </div>
+            
+            {/* Centered title */}
+            <div className="absolute left-1/2 -translate-x-1/2 text-center">
+                <h1 className="text-4xl font-bold text-white drop-shadow-glow mb-2">
+                    Temple of Fortune
+                </h1>
+                <div className="text-lg text-yellow-400 font-semibold">
+                    High Card Game
+                </div>
+            </div>
+            
+            {/* Right side spacer to maintain layout */}
+            <div className="w-24" />
         </div>
     );
 };

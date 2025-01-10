@@ -1,14 +1,14 @@
 .container {
     width: 800px;
     min-height: 600px;
-    background-color: #248f24;
-    border: 5px solid black;
+    border: 5px solid #daa520;
     border-radius: 15px;
     padding: 20px;
     display: flex;
     flex-direction: column;
     align-items: center;
     position: relative;
+    box-shadow: 0 0 50px rgba(0,0,0,0.5);
 }
 
 .top-section {
@@ -29,10 +29,15 @@
 }
 
 .place-your-bets {
-    font-size: 24px;
+       font-size: 24px;
     font-weight: bold;
-    color: white;
+    color: #ffffff;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
     margin-bottom: 20px;
+    background: rgba(0,0,0,0.3);
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 1px solid rgba(218,165,32,0.3);
 }
 
 .betting-area {
@@ -174,8 +179,9 @@
     display: flex;
     justify-content: space-between;
     width: 300px;
-    background-color: #DAA520;
-    border: 2px solid #000;
+	background: rgba(0,0,0,0.8);
+    border: 2px solid #daa520;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
     border-radius: 5px;
     overflow: hidden;
 }
@@ -215,9 +221,24 @@
     font-size: 14px;
     border: none;
     border-radius: 5px;
-    background-color: black;
+	background-color: rgba(0,0,0,0.8);
+    border: 1px solid #daa520;
     color: white;
+    transition: all 0.2s ease;
+
     cursor: pointer;
+}
+
+.actions button:hover:not(:disabled) {
+    background-color: rgba(42,110,42,0.9);
+    border-color: #ffd700;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.actions button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 .chip-denominations {
@@ -270,6 +291,14 @@
     transform: rotate(225deg);
 }
 
+.hand-total, .dealer-total {
+    background-color: rgba(0,0,0,0.8);
+    border: 2px solid #daa520;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    color: white;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
 .hand-total {
     position: absolute;
     top: 53%;
@@ -285,8 +314,8 @@
 
 .dealer-total {
     position: absolute;
-    top: 10%;
-    left: 20px;
+    top: 20%;
+    left: 9%;
     padding: 10px 20px;
     background-color: black;
     color: white;
@@ -358,8 +387,8 @@
         box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.7);
     }
     70% {
-        transform: scale(1.1);
-        box-shadow: 0 0 0 10px rgba(255, 215, 0, 0);
+        transform: scale(1.05);
+        box-shadow: 0 0 20px 10px rgba(255, 215, 0, 0.3);
     }
     100% {
         transform: scale(1);
@@ -457,4 +486,47 @@
 
 .message-display.animating {
     animation: messageAppear 0.3s ease-out forwards;
+}
+
+.drop-shadow-glow {
+    text-shadow: 
+        0 0 10px rgba(255, 215, 0, 0.3),
+        0 0 20px rgba(255, 215, 0, 0.2),
+        0 0 30px rgba(255, 215, 0, 0.1),
+        2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* Add to your BettingPage.css */
+.header-container {
+    position: relative;
+    width: 100%;
+    padding: 1rem;
+    z-index: 20;
+    background: linear-gradient(
+        to bottom,
+        rgba(0,0,0,0.6) 0%,
+        rgba(0,0,0,0.3) 60%,
+        transparent 100%
+    );
+    border-radius: 10px 10px 0 0;
+    margin-bottom: 1rem;
+}
+
+.title-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    border-radius: 8px;
+    background: rgba(0,0,0,0.4);
+    border: 1px solid rgba(218,165,32,0.3);
+}
+
+.chevron-button {
+    transition: transform 0.2s ease;
+}
+
+.chevron-button:hover {
+    transform: scale(1.1) translateX(-2px);
 }

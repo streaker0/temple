@@ -74,15 +74,15 @@ export const GameBoard: React.FC<GameBoardProps> = ({
                     {gameState === 'gameOver' ? (
                         dealerCards.map((card, index) => {
                             // Determine if this card contributed to a winning/losing hand
-                            const isWinningDealer = outcome === 'win';
-                            const isLosingDealer = outcome === 'lose' || outcome === 'bust';
+                            const isWinningDealer = outcome === 'lose';
+                            const isLosingDealer = outcome === 'win'
                             return (
                                 <Card
                                     key={index}
                                     suit={card?.suit}
                                     rank={card?.rank}
                                     isFaceUp={card?.isFaceUp}
-                                    className={`dealer-card revealed ${outcome ? 'outcome-revealed' : ''} ${isWinningDealer ? 'winning-card' : ''} ${isLosingDealer ? 'losing-card' : ''}`}
+                                    className={`dealer-card revealed ${outcome ? 'outcome-revealed' : ''} ${isWinningDealer ? 'winning-card pulse' : ''} ${isLosingDealer ? 'losing-card' : ''}`}
                                     isDealt={true}
                                     isWinning={isWinningDealer}
                                     isLosing={isLosingDealer}
@@ -140,24 +140,26 @@ export const GameBoard: React.FC<GameBoardProps> = ({
                             <div key={spotIndex} className="bet-spot-column">
                                 <div className="card-space">
                                     {spotCards[spotIndex] && (
-                                        <Card
-                                            suit={spotCards[spotIndex]!.suit}
-                                            rank={spotCards[spotIndex]!.rank}
-                                            isFaceUp={spotCards[spotIndex]!.isFaceUp}
-                                            isDealt={animateSpots[spotIndex]}
-                                            isWinning={outcome === 'win'}
-                                            isLosing={outcome === 'lose' || outcome === 'bust'}
-                                            className={`${outcome ? 'outcome-revealed' : ''}`}
-                                        />
+                                          <div className={outcome && outcome !== 'tie' && outcome !== 'bust' ? 'outcome-revealed' : ''}>
+										  <Card
+											  suit={spotCards[spotIndex]!.suit}
+											  rank={spotCards[spotIndex]!.rank}
+											  isFaceUp={spotCards[spotIndex]!.isFaceUp}
+											  isDealt={animateSpots[spotIndex]}
+											  isWinning={outcome === 'win'}
+											  isLosing={outcome === 'lose'}
+											  className={outcome === 'win' ? 'pulse' : ''}
+										  />
+									  </div>
                                     )}
                                 </div>
 
                                 <div className={`spot-circle face-down ${spotBets[spotIndex].faceDown > 0 ? 'chip-placed' : ''}`}>
-                                    ${spotBets[spotIndex].faceDown}
+                                    {spotBets[spotIndex].faceDown === 0 ? "Face Down":" $"+ spotBets[spotIndex].faceDown}
                                 </div>
 
                                 <div className={`spot-circle face-up ${spotBets[spotIndex].faceUp > 0 ? 'chip-placed' : ''}`}>
-                                    ${spotBets[spotIndex].faceUp}
+                                    {spotBets[spotIndex].faceUp === 0 ? "Face up":" $"+ spotBets[spotIndex].faceUp }
                                 </div>
                             </div>
                         ))}

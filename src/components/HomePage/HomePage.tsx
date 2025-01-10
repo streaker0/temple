@@ -3,8 +3,18 @@ import { Coins, Spade, ArrowDownCircle, ArrowUpCircle, PlayCircle } from 'lucide
 import { useNavigate } from 'react-router-dom';
 import { useGame } from '../../context/GameContext';
 
+const Layout = ({ children }: { children: React.ReactNode }) => {
+    return (
+        <div className="w-screen h-screen overflow-hidden bg-gradient-to-b from-emerald-900 via-emerald-800 to-emerald-900">
+            <div className="w-full h-full overflow-auto flex items-center justify-center p-4">
+                {children}
+            </div>
+        </div>
+    )
+}
+
 const TemplePage = () => {
-	const navigate = useNavigate();
+    const navigate = useNavigate();
     const {balance, setBalance} = useGame()
     const [amount, setAmount] = useState('')
     const [username] = useState('Player1') // TODO: Get from auth
@@ -25,19 +35,17 @@ const TemplePage = () => {
         }
     }
 
-
-
     return (
-        <div className="min-h-screen bg-gradient-to-b from-emerald-900 via-emerald-800 to-emerald-900 p-8">
-            <div className="max-w-2xl mx-auto bg-gradient-to-b from-amber-100 to-amber-200 rounded-lg shadow-2xl p-8 border-t-4 border-amber-400">
+        <Layout>
+            <div className="w-full max-w-4xl min-h-[600px] bg-gradient-to-b from-amber-100 to-amber-200 rounded-lg shadow-2xl p-12 border-t-4 border-amber-400 transform transition-all flex flex-col justify-between">
                 {/* Header Section */}
-                <div className="text-center mb-8">
+                <div className="text-center mb-12">
                     <div className="relative">
                         <Spade className="w-20 h-20 mx-auto mb-4 text-purple-800" />
                         <div className="absolute -top-2 -right-2 w-6 h-6 bg-amber-400 rounded-full animate-pulse" />
                     </div>
                     <h1 className="text-4xl font-bold text-purple-900 mb-2">
-                        Temple Games
+                        Temple of Fortune
                     </h1>
                     <div className="text-xl text-purple-700 font-medium bg-purple-100 rounded-full py-1 px-4 inline-block">
                         Welcome, {username}
@@ -45,7 +53,7 @@ const TemplePage = () => {
                 </div>
 
                 {/* Balance Display */}
-                <div className="bg-gradient-to-r from-purple-100 via-purple-50 to-purple-100 rounded-lg p-6 mb-8 text-center shadow-inner">
+                <div className="bg-gradient-to-r from-purple-100 via-purple-50 to-purple-100 rounded-lg p-8 mb-12 text-center shadow-inner">
                     <div className="flex items-center justify-center gap-2 mb-2">
                         <Coins className="w-6 h-6 text-amber-600" />
                         <span className="text-2xl font-semibold text-purple-900">
@@ -104,7 +112,7 @@ const TemplePage = () => {
                     </button>
                 </div>
             </div>
-        </div>
+        </Layout>
     )
 }
 

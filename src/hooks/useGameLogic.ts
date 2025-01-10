@@ -56,49 +56,11 @@ export const useGameLogic = () => {
 	const handleGameOver = async (updatedSpotCards: SpotCard[], finalBets: SpotBet[]) => {
 		await sleep(500)
 		setGameState('gameOver');
-		setIsAnimating(true);
 		let currentDealerCards: SpotCard[] = [];
 		let finalDealerTotal = dealerTotal;
 
-		await sleep(200)
-
-		setMessage("Revealing player's cards...");
-
-		// First reveal ante card if face down
-		if (anteCard && !anteCard.isFaceUp) {
-			await sleep(1000);
-			setAnteCard(prev => prev ? { ...prev, isFaceUp: true } : null);
-		}
-
-		// Reveal all spot cards and ensure they're counted
-		const revealSpotCards = async () => {
-			let newSpotCards = updatedSpotCards.map(card =>
-				card ? { ...card } : null
-			);
-			let cardsToReveal = false;
-
-			// Check if we have any face down cards to reveal
-			for (let i = 0; i < newSpotCards.length; i++) {
-				if (newSpotCards[i] && !newSpotCards[i]!.isFaceUp) {
-					cardsToReveal = true;
-					break;
-				}
-			}
-
-			if (cardsToReveal) {
-				const newSpotCards = updatedSpotCards.map(card => 
-					card && !card.isFaceUp ? { ...card, isFaceUp: true } : card
-				);
-				setSpotCards(newSpotCards);
-			}
-		};
-
-		await revealSpotCards();
-		await sleep(1000); // Give time for final card reveal
-
+		// Handle dealer's cards first
 		setMessage("Dealer's turn...");
-
-		// Rest of dealer logic...
 		if (dealerCard) {
 			currentDealerCards = [{ ...dealerCard, isFaceUp: true }];
 			setDealerCards(currentDealerCards);
@@ -117,13 +79,32 @@ export const useGameLogic = () => {
 			await sleep(1000);
 		}
 
+		// Now reveal player's cards
+		setMessage("Revealing player's cards...");
+		await sleep(1000);
+
+		// First reveal ante card if face down
+		if (anteCard && !anteCard.isFaceUp) {
+			await sleep(1000);
+			setAnteCard(prev => prev ? { ...prev, isFaceUp: true } : null);
+		}
+
+		// Reveal all spot cards
+		if (updatedSpotCards.some(card => card && !card.isFaceUp)) {
+			const newSpotCards = updatedSpotCards.map(card => 
+				card && !card.isFaceUp ? { ...card, isFaceUp: true } : card
+			);
+			setSpotCards(newSpotCards);
+			await sleep(1000);
+		}
+
 		// Calculate final total after all cards are revealed
 		const playerTotal = calculateFinalTotal(updatedSpotCards);
 		const outcome = determineGameOutcome(playerTotal, finalDealerTotal);
 		setGameOutcome(outcome);
 
 
-		// Set the appropriate winner message
+		// Set and display the outcome message first
 		let winnerMessage = '';
 		if (outcome === 'win') {
 			winnerMessage = 'Player wins!';
@@ -135,9 +116,11 @@ export const useGameLogic = () => {
 			winnerMessage = 'Both bust!!';
 		}
 		setMessage(winnerMessage);
-
-		await sleep(1500); // Increased delay for better timing
-		// Keep isAnimating true until message is displayed and all animations complete
+		
+		await sleep(2000); // Give time for outcome message to be seen
+		
+		// Now start the winning animation
+		setIsAnimating(true);
 
 		const totalFrontBet = frontBet + finalBets[3].faceUp ;  // Face up bets
 		const totalBackBet = backBet + finalBets[3].faceDown;;    // Face down bets
@@ -320,7 +303,7 @@ const handlePlayerAction = async (action: PlayerAction) => {
                 setIsAnimating(true);
                 
                 try {
-                    const { finalCards, finalBets, newCard } = await placeCard(action);
+                    const { finalCards, finalBets} = await placeCard(action);
                     
                     // Handle last position (index 3)
                     if (currentSpotIndex === 3) {
