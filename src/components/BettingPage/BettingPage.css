@@ -93,7 +93,7 @@
 .ante-card {
     position: absolute;
     bottom: 100px;  /* Position above the ante circle */
-    left: 48%;
+    left: -60%;
     transform: translateX(-50%);
     z-index: 1;
 	width: 96px;
