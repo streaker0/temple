@@ -396,20 +396,6 @@
     }
 }
 
-@keyframes losePulse {
-    0% {
-        transform: scale(1);
-        box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7);
-    }
-    70% {
-        transform: scale(1.1);
-        box-shadow: 0 0 0 10px rgba(255, 0, 0, 0);
-    }
-    100% {
-        transform: scale(1);
-        box-shadow: 0 0 0 0 rgba(255, 0, 0, 0);
-    }
-}
 .card-dealt {
     animation: dealCard 0.5s ease-out forwards;
 }
@@ -422,9 +408,6 @@
     animation: winPulse 1s ease-in-out infinite;
 }
 
-.losing-hand {
-    animation: losePulse 1s ease-in-out infinite;
-}
 
 .card-image:hover {
     transform: translateY(-10px);

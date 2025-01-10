@@ -75,17 +75,15 @@ export const GameBoard: React.FC<GameBoardProps> = ({
                         dealerCards.map((card, index) => {
                             // Determine if this card contributed to a winning/losing hand
                             const isWinningDealer = outcome === 'lose';
-                            const isLosingDealer = outcome === 'win'
                             return (
                                 <Card
                                     key={index}
                                     suit={card?.suit}
                                     rank={card?.rank}
                                     isFaceUp={card?.isFaceUp}
-                                    className={`dealer-card revealed ${outcome ? 'outcome-revealed' : ''} ${isWinningDealer ? 'winning-card pulse' : ''} ${isLosingDealer ? 'losing-card' : ''}`}
+                                    className={`dealer-card revealed ${outcome ? 'outcome-revealed' : ''} ${isWinningDealer ? 'winning-card pulse' : ''}`}
                                     isDealt={true}
                                     isWinning={isWinningDealer}
-                                    isLosing={isLosingDealer}
                                 />
                             );
                         })
@@ -131,7 +129,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
                                     className="ante-card"
                                     isDealt={true}
                                     isWinning={outcome === 'win'}
-                                    isLosing={outcome === 'lose'}
+                                    
                                 />
                             )}
                         </div>
@@ -147,7 +145,6 @@ export const GameBoard: React.FC<GameBoardProps> = ({
 											  isFaceUp={spotCards[spotIndex]!.isFaceUp}
 											  isDealt={animateSpots[spotIndex]}
 											  isWinning={outcome === 'win'}
-											  isLosing={outcome === 'lose'}
 											  className={outcome === 'win' ? 'pulse' : ''}
 										  />
 									  </div>
