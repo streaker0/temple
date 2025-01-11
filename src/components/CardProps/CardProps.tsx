@@ -36,12 +36,12 @@ const Card: React.FC<CardProps> = ({
   // Get the S3 URL for the card image
   const getCardImage = () => {
     if (!isFaceUp) {
-      return `${S3_BUCKET_URL}/face-down.jpg`;
+      return `${S3_BUCKET_URL}/face-down.JPG`;
     }
     
     // Convert rank and suit to match naming scheme
     const cardName = `${rank.toLowerCase()}-${suit.toLowerCase()}`;
-    return `${S3_BUCKET_URL}/${cardName}.jpg`;
+    return `${S3_BUCKET_URL}/${cardName}.JPG`;
   };
 
   // Combine animation classes
