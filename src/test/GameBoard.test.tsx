@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, act } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { GameBoard } from '../components/BettingPage/GameBoard';
 import { SpotCard } from '../types/game.types';
 

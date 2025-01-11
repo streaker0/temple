@@ -42,7 +42,7 @@ describe('ChipSelector', () => {
     });
 
     it('calls onClickOutside when clicking outside the component', () => {
-        const { container } = render(
+        render(
             <div>
                 <ChipSelector {...defaultProps} />
                 <div data-testid="outside">Outside Element</div>

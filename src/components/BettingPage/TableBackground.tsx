@@ -1,5 +1,3 @@
-import React from 'react';
-
 const TableBackground = () => {
   return (
     <div className="relative w-full h-full">

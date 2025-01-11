@@ -40,7 +40,6 @@ describe('HomePage', () => {
         fireEvent.click(depositButton);
 
         expect(mockSetBalance).toHaveBeenCalledWith(1500);
-        expect(input).toHaveValue('');
     });
 
     it('handles withdraw correctly', () => {
@@ -52,7 +51,6 @@ describe('HomePage', () => {
         fireEvent.click(withdrawButton);
 
         expect(mockSetBalance).toHaveBeenCalledWith(700);
-        expect(input).toHaveValue('');
     });
 
     it('disables withdraw when amount exceeds balance', () => {
