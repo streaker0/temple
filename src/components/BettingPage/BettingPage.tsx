@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { BettingControls } from './BettingControls';
 import { ChipSelector } from './ChipSelector';
 import { GameBoard } from './GameBoard';
@@ -19,6 +20,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 }
 
 const BettingPage: React.FC = () => {
+    const navigate = useNavigate();
     const {
         balance,
         bet,
@@ -44,12 +46,28 @@ const BettingPage: React.FC = () => {
         startGame,
         handlePlayerAction,
         handleRebet,
-        startNewGame
+        startNewGame,
+        isAuthenticated
     } = useGame();
 	
     const handleClickOutside = () => {
         setShowChipButtons(false);
     };
+
+    const handleHomeClick = () => {
+        if (bet > 0) {
+            clearBet();
+            startNewGame();
+        }
+        navigate('/home');
+    };
+
+    // Redirect to login if not authenticated
+    React.useEffect(() => {
+        if (!isAuthenticated) {
+            navigate('/login');
+        }
+    }, [isAuthenticated, navigate]);
 
     return (
         <Layout>
@@ -58,15 +76,7 @@ const BettingPage: React.FC = () => {
                     <TableBackground />
                 </div>
                 <div className="relative z-10 h-full flex flex-col p-6">
-                    <Header 
-                        onHomeClick={() => {
-                            if (bet > 0) {
-                                clearBet();
-                                startNewGame();
-                            }
-                            window.location.href = '/';
-                        }}
-                    />
+                    <Header onHomeClick={handleHomeClick} />
                     <MessageDisplay message={message} isAnimating={isAnimating} />
                     <GameBoard
                         gameState={gameState}

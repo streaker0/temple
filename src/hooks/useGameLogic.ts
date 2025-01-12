@@ -6,10 +6,7 @@ import { determineGameOutcome } from '../utils/gameEndUtils';
 import { INITIAL_BALANCE, MAX_BET, MIN_BET, DEALER_MIN_TOTAL, MAX_CARDS, NUM_SPOTS } from '../constants/game.constants';
 
 export const useGameLogic = () => {
-	const [balance, setBalance] = useState(() => {
-		const savedBalance = localStorage.getItem('gameBalance');
-		return savedBalance ? parseFloat(savedBalance) : INITIAL_BALANCE;
-	});
+	const [balance, setBalance] = useState(INITIAL_BALANCE);
 	const [bet, setBet] = useState(0);
 	const [anteBet, setAnteBet] = useState(0);
 	const [selectedDenomination, setSelectedDenomination] = useState(10);
@@ -131,7 +128,7 @@ export const useGameLogic = () => {
 			 //
 			case 'win':
 				const winnings = (totalFrontBet * 2) + (totalBackBet * 3); // Double the bet for a win
-				setBalance(prev => prev + winnings);
+				setBalance(balance + winnings);
 				await sleep(1500);
 				setMessage(`Congratulations! You won $${winnings.toFixed(2)}!`);
 				break;
@@ -141,12 +138,12 @@ export const useGameLogic = () => {
 				break;
 			case 'tie':
 				await sleep(1500);
-				setBalance(prev => prev + bet); // Return the original bet
+				setBalance(balance + bet); // Return the original bet
 				setMessage("It's a tie! Your bet has been returned.");
 				break;
 			case 'bust':
 				await sleep(1500);
-				setBalance(prev => prev + (bet * 0.5));
+				setBalance(balance + (bet * 0.5));
 				setMessage(`Both Bust!! You lost $${(bet * 0.5).toFixed(2)}.`);
 				break;
 
@@ -211,7 +208,7 @@ export const useGameLogic = () => {
 
 	const clearBet = () => {
 		if (gameState !== 'betting') return;
-		setBalance(prev => prev + bet);
+		setBalance(balance + bet);
 		setBet(0);
 		setAnteBet(0);
 	};
@@ -283,7 +280,7 @@ const placeCard = async (action: PlayerAction) => {
         setBackBet(prev => prev + anteBet);
     }
     
-    setBalance(prev => prev - anteBet);
+    setBalance(balance - anteBet);
     setBet(prev => prev + anteBet);
     
     return { finalCards, finalBets, newCard };

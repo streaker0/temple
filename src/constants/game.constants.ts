@@ -1,5 +1,5 @@
 export const CHIP_DENOMINATIONS = [1, 5, 10, 25, 100, 500];
-export const INITIAL_BALANCE = 4472;
+export const INITIAL_BALANCE = 1000;
 export const MAX_BET = 1000;
 export const MIN_BET = 1;
 export const DEALER_MIN_TOTAL = 15;

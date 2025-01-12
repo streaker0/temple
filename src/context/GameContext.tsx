@@ -1,13 +1,62 @@
-import React, { createContext, useContext } from 'react';
+// src/context/GameContext.tsx
+import React, { createContext, useContext, useEffect, useCallback } from 'react';
 import { useGameLogic } from '../hooks/useGameLogic';
+import { useAuth } from '../hooks/useAuth';
+import { User } from 'firebase/auth';
 
-const GameContext = createContext<ReturnType<typeof useGameLogic> | null>(null);
+interface GameContextType extends ReturnType<typeof useGameLogic> {
+    isAuthenticated: boolean;
+    user: User | null;
+    signIn: (email: string, password: string) => Promise<boolean>;
+    signUp: (email: string, password: string, username: string) => Promise<boolean>;
+    signOut: () => Promise<boolean>;
+}
+
+const GameContext = createContext<GameContextType | null>(null);
 
 export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const gameLogic = useGameLogic();
+    const { 
+        isAuthenticated, 
+        user,
+        balance: firebaseBalance, 
+        updateUserBalance, 
+        signIn,
+        signUp,
+        signOut 
+    } = useAuth();
+
+    const syncBalance = useCallback(async () => {
+        if (isAuthenticated && gameLogic.balance !== firebaseBalance) {
+            await updateUserBalance(gameLogic.balance);
+        }
+    }, [isAuthenticated, gameLogic.balance, firebaseBalance, updateUserBalance]);
+
+    const initializeBalance = useCallback(() => {
+        if (isAuthenticated && firebaseBalance !== gameLogic.balance) {
+            gameLogic.setBalance(firebaseBalance);
+        }
+    }, [isAuthenticated, firebaseBalance, gameLogic]);
+
+    useEffect(() => {
+        syncBalance();
+    }, [syncBalance]);
+
+    useEffect(() => {
+        initializeBalance();
+    }, [initializeBalance]);
+
+    const contextValue = {
+        ...gameLogic,
+        isAuthenticated,
+        user,
+        signIn,
+        signUp,
+        signOut,
+    };
     
     return (
-        <GameContext.Provider value={gameLogic}>
+        <GameContext.Provider value={contextValue}>
             {children}
         </GameContext.Provider>
     );
