@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGame } from '../../context/GameContext';
-import { ChevronLeft, Spade, UserPlus, Mail, Lock, User } from 'lucide-react';
+import { Spade, UserPlus, Mail, Lock, User } from 'lucide-react';
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
     return (
