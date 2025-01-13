@@ -3,6 +3,7 @@ import { GameState } from '../../types/game.types';
 
 interface BettingControlsProps {
     gameState: GameState;
+	anteBet:number;
     balance: number;
     bet: number;
     lastBet: number;
@@ -16,12 +17,14 @@ interface BettingControlsProps {
     onFaceDown: () => void;
     onNewGame: () => void;
     isAnimating: boolean;
+	isEndingGame: boolean;
 }
 
 export const BettingControls: React.FC<BettingControlsProps> = ({
     gameState,
     balance,
     bet,
+	anteBet,
     lastBet,
     onRebet,
     onClearBet,
@@ -32,39 +35,41 @@ export const BettingControls: React.FC<BettingControlsProps> = ({
     onFaceUp,
     onFaceDown,
     onNewGame,
-    isAnimating
+    isAnimating,
+	isEndingGame
 }) => {
+	const isControlsDisabled = isAnimating || isEndingGame;
     const renderGameControls = () => {
         if (gameState === 'betting') {
             return (
                 <>
                     <button 
                         onClick={onRebet}
-                        disabled={isAnimating || lastBet === 0 || balance < lastBet}
-                        className={`betting-button ${isAnimating ? 'disabled' : ''}`}
+                        disabled={isControlsDisabled || lastBet === 0 || balance < lastBet}
+                        className={`betting-button ${isControlsDisabled ? 'disabled' : ''}`}
                     >
                         Rebet
                     </button>
                     <button 
                         onClick={onClearBet}
-                        disabled={isAnimating || bet === 0}
-                        className={`betting-button ${isAnimating ? 'disabled' : ''}`}
+                        disabled={isControlsDisabled || bet === 0}
+                        className={`betting-button ${isControlsDisabled ? 'disabled' : ''}`}
                     >
                         Clear Bet
                     </button>
 
                     <button 
                         onClick={onToggleChips}
-                        disabled={isAnimating}
-                        className={`betting-button ${isAnimating ? 'disabled' : ''}`}
+                        disabled={isControlsDisabled}
+                        className={`betting-button ${isControlsDisabled ? 'disabled' : ''}`}
                     >
                         Chip Selector (${selectedDenomination})
                     </button>
 
                     <button 
                         onClick={onDeal}
-                        disabled={isAnimating || bet === 0}
-                        className={`betting-button deal-button ${isAnimating ? 'disabled' : ''}`}
+                        disabled={isControlsDisabled || bet === 0}
+                        className={`betting-button deal-button ${isControlsDisabled ? 'disabled' : ''}`}
                     >
                         Deal
                     </button>
@@ -75,22 +80,22 @@ export const BettingControls: React.FC<BettingControlsProps> = ({
                 <>
                     <button 
                         onClick={onStand}
-                        disabled={isAnimating}
-                        className={`action-button ${isAnimating ? 'disabled' : ''}`}
+                        disabled={isControlsDisabled}
+                        className={`action-button ${isControlsDisabled ? 'disabled' : ''}`}
                     >
                         Stand
                     </button>
                     <button 
                         onClick={onFaceUp}
-                        disabled={isAnimating || balance < bet}
-                        className={`action-button ${isAnimating ? 'disabled' : ''}`}
+                        disabled={isControlsDisabled || balance < anteBet}
+                        className={`action-button ${isControlsDisabled ? 'disabled' : ''}`}
                     >
                         Face Up
                     </button>
                     <button 
                         onClick={onFaceDown}
-                        disabled={isAnimating || balance < bet}
-                        className={`action-button ${isAnimating ? 'disabled' : ''}`}
+                        disabled={isControlsDisabled || balance < anteBet}
+                        className={`action-button ${isControlsDisabled ? 'disabled' : ''}`}
                     >
                         Face Down
                     </button>
@@ -100,8 +105,8 @@ export const BettingControls: React.FC<BettingControlsProps> = ({
             return (
                 <button 
                     onClick={onNewGame}
-                    disabled={isAnimating}
-                    className={`new-game-button ${isAnimating ? 'disabled' : ''}`}
+                    disabled={isControlsDisabled}
+                    className={`new-game-button ${isControlsDisabled? 'disabled' : ''}`}
                 >
                     New Game
                 </button>
@@ -111,7 +116,7 @@ export const BettingControls: React.FC<BettingControlsProps> = ({
     };
 
     return (
-        <div className={`controls ${isAnimating ? 'animating' : ''}`}>
+        <div className={`controls ${isControlsDisabled ? 'animating' : ''}`}>
             <div className="balance-bet-container">
                 <div className="balance-display">
                     <div className="balance-label">BALANCE</div>

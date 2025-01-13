@@ -20,14 +20,9 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const AppRoutes = () => {
 	return (
 	  <Routes>
-		
+		<Route path="/" element={<LoginPage />} />
 		<Route path="/login" element={<LoginPage />} />
 		<Route path="/signup" element={<SignupPage />} />
-		<Route path="/" element={
-			<ProtectedRoute>
-				<HomePage />
-			</ProtectedRoute>
-			} />
 		<Route path="/home" element={
 			<ProtectedRoute>
 				<HomePage />

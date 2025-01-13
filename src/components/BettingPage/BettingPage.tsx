@@ -7,6 +7,7 @@ import { Header } from './Header';
 import { MessageDisplay } from '../Modal/MessageDisplay';
 import TableBackground from './TableBackground';
 import { useGame } from '../../context/GameContext';
+import { MAX_BET } from '../../constants/game.constants';
 import './BettingPage.css';
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
@@ -19,36 +20,37 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     )
 }
 
-const BettingPage: React.FC = () => {
-    const navigate = useNavigate();
-    const {
-        balance,
-        bet,
-        lastBet,
-        anteBet,
-        selectedDenomination,
-        showChipButtons,
-        setShowChipButtons,
-        gameState,
-        anteCard,
-        dealerCard,
-        spotCards,
-        spotBets,
-        dealerCards,
-        dealerTotal,
-        gameOutcome,
-        isAnimating,
-        message,
-        setSelectedDenomination,
-        calculateHandTotal,
-        placeBet,
-        clearBet,
-        startGame,
-        handlePlayerAction,
-        handleRebet,
-        startNewGame,
-        isAuthenticated
-    } = useGame();
+	const BettingPage: React.FC = () => {
+		const navigate = useNavigate();
+		const {
+			balance,
+			bet,
+			lastBet,
+			anteBet,
+			selectedDenomination,
+			showChipButtons,
+			setShowChipButtons,
+			gameState,
+			anteCard,
+			dealerCard,
+			spotCards,
+			spotBets,
+			dealerCards,
+			dealerTotal,
+			gameOutcome,
+			isAnimating,
+			isEndingGame,
+			message,
+			setSelectedDenomination,
+			calculateHandTotal,
+			placeBet,
+			clearBet,
+			startGame,
+			handlePlayerAction,
+			handleRebet,
+			startNewGame,
+			isAuthenticated
+		} = useGame();
 	
     const handleClickOutside = () => {
         setShowChipButtons(false);
@@ -88,7 +90,16 @@ const BettingPage: React.FC = () => {
                         handTotal={calculateHandTotal()}
                         dealerTotal={dealerTotal}
                         anteBet={anteBet}
-                        onBetClick={() => !isAnimating && placeBet(selectedDenomination)}
+                        onBetClick={() => {
+							// Only try to place bet if we can afford the selected denomination
+							const canAffordChip = balance >= selectedDenomination;
+							const newBet = bet + selectedDenomination;
+							const withinMaxBet = newBet <= MAX_BET;
+							
+							if (!isAnimating && canAffordChip && withinMaxBet) {
+								placeBet(selectedDenomination);
+							}
+						}}
                         outcome={gameOutcome}
                     />
                     <ChipSelector
@@ -96,11 +107,15 @@ const BettingPage: React.FC = () => {
                         selectedDenomination={selectedDenomination}
                         onSelect={setSelectedDenomination}
                         onClickOutside={handleClickOutside}
+						currentBet={bet}
+						currentBalance={balance}
+						gameState={gameState}
                     />
                     <BettingControls
                         gameState={gameState}
                         balance={balance}
                         bet={bet}
+						anteBet={anteBet}
                         lastBet={lastBet}
                         onRebet={() => !isAnimating && handleRebet()}
                         onClearBet={() => !isAnimating && clearBet()}
@@ -112,6 +127,7 @@ const BettingPage: React.FC = () => {
                         onFaceDown={() => !isAnimating && handlePlayerAction('faceDown')}
                         onNewGame={() => !isAnimating && startNewGame()}
                         isAnimating={isAnimating}
+						isEndingGame={isEndingGame}
                     />
                 </div>
             </div>

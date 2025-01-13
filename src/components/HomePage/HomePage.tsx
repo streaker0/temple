@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Coins, Spade, ArrowDownCircle, ArrowUpCircle, PlayCircle, LogOut } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Coins, Spade, ArrowDownCircle, ArrowUpCircle, PlayCircle, LogOut, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useGame } from '../../context/GameContext';
 
@@ -15,7 +15,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
 const HomePage = () => {
     const navigate = useNavigate();
-    const {balance, setBalance, signOut} = useGame();
+	const { balance, setBalance, signOut, username, isLoading,isAuthenticated } = useGame();
     const [amount, setAmount] = useState('');
     const [isDepositing, setIsDepositing] = useState(false);
     const [isWithdrawing, setIsWithdrawing] = useState(false);
@@ -48,6 +48,21 @@ const HomePage = () => {
         await signOut();
         navigate('/login');
     };
+	useEffect(() => {
+        if (!isAuthenticated) {
+            navigate('/login');
+        }
+    }, [isAuthenticated, navigate]);
+
+    if (isLoading) {
+        return (
+            <Layout>
+                <div className="w-full max-w-4xl min-h-[600px] flex items-center justify-center">
+                    <div className="text-2xl text-white">Loading your fortune...</div>
+                </div>
+            </Layout>
+        );
+    }
 
     return (
         <Layout>
@@ -67,14 +82,20 @@ const HomePage = () => {
 
                 {/* Main Content */}
                 <div className="relative flex flex-col items-center justify-between min-h-[600px] px-8 py-12">
-                    {/* Sign Out Button */}
-                    <button
-                        onClick={handleSignOut}
-                        className="absolute top-4 right-4 flex items-center gap-2 bg-red-600/80 hover:bg-red-500 text-white px-4 py-2 rounded-lg transition-all transform hover:scale-105 shadow-lg hover:shadow-red-500/30"
-                    >
-                        <LogOut className="w-4 h-4" />
-                        Sign Out
-                    </button>
+                    {/* Sign Out and User Info */}
+                    <div className="absolute top-4 right-4 flex items-center gap-4">
+                        <div className="flex items-center gap-2 bg-yellow-600/30 text-white px-4 py-2 rounded-lg">
+                            <User className="w-4 h-4 text-yellow-400" />
+                            {/* <span className="font-medium">{username}</span> */}
+                        </div>
+                        <button
+                            onClick={handleSignOut}
+                            className="flex items-center gap-2 bg-red-600/80 hover:bg-red-500 text-white px-4 py-2 rounded-lg transition-all transform hover:scale-105 shadow-lg hover:shadow-red-500/30"
+                        >
+                            <LogOut className="w-4 h-4" />
+                            Sign Out
+                        </button>
+                    </div>
 
                     {/* Header Section */}
                     <div className="text-center mb-8">
@@ -86,7 +107,7 @@ const HomePage = () => {
                             Temple of Fortune
                         </h1>
                         <div className="text-lg text-yellow-400 font-semibold">
-                            Welcome to the Temple
+                            Welcome to the Temple, {username}
                         </div>
                     </div>
 
@@ -103,6 +124,7 @@ const HomePage = () => {
                         </div>
                     </div>
 
+                    {/* Rest of the component remains the same */}
                     {/* Transaction Controls */}
                     <div className="w-full max-w-md space-y-6">
                         <div className="flex justify-center">

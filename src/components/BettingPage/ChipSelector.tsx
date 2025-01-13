@@ -1,11 +1,15 @@
 import React, { useRef, useEffect }  from 'react';
 import { CHIP_DENOMINATIONS } from '../../constants/game.constants';
+import { MAX_BET } from '../../constants/game.constants';
 
 interface ChipSelectorProps {
     show: boolean;
     selectedDenomination: number;
     onSelect: (value: number) => void;
 	onClickOutside: () => void;
+	currentBet: number;
+	currentBalance: number;
+    gameState: 'betting' | 'playing' | 'gameOver';
 }
 
 const chipDenominations = CHIP_DENOMINATIONS;
@@ -14,7 +18,10 @@ export const ChipSelector: React.FC<ChipSelectorProps> = ({
     show,
     selectedDenomination,
     onSelect,
-	onClickOutside
+	onClickOutside,
+	currentBet,
+	currentBalance,
+    gameState
 }) => {
     const chipSelectorRef = useRef<HTMLDivElement>(null);
 
@@ -34,6 +41,12 @@ export const ChipSelector: React.FC<ChipSelectorProps> = ({
         };
     }, [show, onClickOutside]);
 
+	const isChipDisabled = (chipValue: number) => {
+        const potentialBet = currentBet + chipValue;
+		const potentialBalance = currentBalance - chipValue;
+        return gameState !== 'betting' || potentialBet > MAX_BET || potentialBalance < 0;
+    };
+
     if (!show) return null;
 
     return (
@@ -41,8 +54,10 @@ export const ChipSelector: React.FC<ChipSelectorProps> = ({
             {chipDenominations.map((value) => (
                 <button
                     key={value}
-                    className={`chip-button ${selectedDenomination === value ? 'selected' : ''}`}
-                    onClick={() => onSelect(value)}
+                    className={`chip-button ${selectedDenomination === value ? 'selected' : ''} 
+                              ${isChipDisabled(value) ? 'disabled' : ''}`}
+                    onClick={() => !isChipDisabled(value) && onSelect(value)}
+                    disabled={isChipDisabled(value)}
                 >
                     ${value}
                 </button>
